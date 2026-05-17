@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MASTERR_SWARM // SENTIMENT_ARBITRAGE v2.2</title>
+    
     <link rel="stylesheet" href="./style.css">
     <link rel="manifest" href="./manifest.json">
 </head>
@@ -36,7 +36,6 @@
                 <button onclick="Swarm.clearFeed()" style="background:#333; flex:0.6;">RESET</button>
             </div>
 
-            <!-- New Scroll Controls -->
             <div class="data-card">
                 <div class="section-title">SCROLL CONTROLS v2</div>
                 <div class="toggle-switch">
@@ -67,9 +66,7 @@
 
         <section id="visualization-zone">
             <div id="heat-map-container">
-                <div id="heat-map">
-                    <!-- JS populated - now horizontally scrollable -->
-                </div>
+                <div id="heat-map"></div>
             </div>
 
             <div id="feed-results">
@@ -81,15 +78,11 @@
         </section>
     </main>
 
-    <!-- Scroll to top button -->
-    <div onclick="Swarm.scrollToTop()" class="scroll-top" id="scrollBtn" style="display:none;">
-        ↑
-    </div>
+    <div onclick="Swarm.scrollToTop()" class="scroll-top" id="scrollBtn" style="display:none;">↑</div>
 
     <script>
         const Swarm = {
             autoScrollEnabled: false,
-            lastScrollHeight: 0,
 
             async fetch() {
                 const source = document.getElementById('rss-source').value;
@@ -97,7 +90,6 @@
                 resultsCont.innerHTML = `
                     <div style="text-align:center; padding:60px 20px; opacity:0.8;">
                         <div class="pulse" style="font-size:1.3rem; margin-bottom:15px;">INTERCEPTING STABLE FEED...</div>
-                        <div style="font-size:0.9rem; color:#888;">Analyzing market horses...</div>
                     </div>`;
 
                 try {
@@ -108,9 +100,7 @@
                 } catch (e) {
                     resultsCont.innerHTML = `
                         <div style="color:#ff6666; text-align:center; padding:40px;">
-                            STABLE DISRUPTION<br>
-                            <span style="font-size:0.85rem; opacity:0.7;">${e.message}</span><br><br>
-                            <button onclick="Swarm.fetch()" style="background:#8B5A2B; padding:10px 20px;">RETRY</button>
+                            STABLE DISRUPTION<br>${e.message}
                         </div>`;
                 }
             },
@@ -121,19 +111,11 @@
                 resultsCont.innerHTML = '';
                 heatMap.innerHTML = '';
 
-                if (!items || items.length === 0) {
-                    resultsCont.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.6;">No items received from source.</div>';
-                    return;
-                }
-
                 let totalScore = 0;
-                let positiveCount = 0;
 
-                // Process more items in v2.2
-                items.slice(0, 50).forEach((item, index) => {
+                items.slice(0, 50).forEach((item) => {
                     const score = this.analyze(item.title + " " + (item.content || item.description || ''));
                     totalScore += score;
-                    if (score > 0) positiveCount++;
 
                     const card = document.createElement('div');
                     card.className = 'data-card';
@@ -143,22 +125,16 @@
                     card.innerHTML = `
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;">
                             <span class="sentiment-badge ${vibeClass}">${vibeText}</span>
-                            <span style="font-size:10px; opacity:0.6;">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                         </div>
                         <div style="font-weight:600; line-height:1.3; margin-bottom:8px;">${item.title}</div>
-                        <a href="${item.link || '#'}" target="_blank" style="color:var(--accent-gold); font-size:10px; text-decoration:none; display:inline-block;">
-                            [VIEW SOURCE NODE]
-                        </a>
+                        <a href="${item.link || '#'}" target="_blank" style="color:var(--accent-gold); font-size:10px; text-decoration:none;">[VIEW SOURCE NODE]</a>
                     `;
                     resultsCont.appendChild(card);
 
-                    // Heat bar - fixed width for horizontal scroll
                     const bar = document.createElement('div');
                     bar.className = 'bar';
-                    const height = Math.min(Math.abs(score) * 38 + 22, 160);
-                    bar.style.height = `${height}px`;
+                    bar.style.height = `${Math.min(Math.abs(score) * 38 + 22, 160)}px`;
                     bar.style.background = score >= 0 ? 'var(--bull-green)' : 'var(--bear-red)';
-                    bar.title = `${item.title} | Score: ${score}`;
                     heatMap.appendChild(bar);
                 });
 
@@ -166,22 +142,16 @@
                 const biasEl = document.getElementById('bias-val');
                 biasEl.innerText = finalBias;
                 biasEl.style.color = totalScore > 8 ? 'var(--bull-green)' : (totalScore < -8 ? 'var(--bear-red)' : '#aaa');
-
                 document.getElementById('node-count').textContent = `NODES: ${items.length}`;
 
-                // Auto-scroll to bottom after new data
-                if (this.autoScrollEnabled) {
-                    setTimeout(() => this.scrollToBottom(), 100);
-                }
+                if (this.autoScrollEnabled) setTimeout(() => this.scrollToBottom(), 100);
             },
 
             analyze(text) {
-                const pos = ['growth', 'up', 'launch', 'success', 'profit', 'surge', 'new', 'win', 'bull', 'future', 'ai', 'breakthrough', 'gain', 'rise', 'rally', 'strong', 'boost', 'innovat', 'record'];
-                const neg = ['drop', 'fail', 'loss', 'crisis', 'down', 'risk', 'bear', 'warning', 'sue', 'hack', 'crash', 'scam', 'fall', 'decline', 'fear', 'recession', 'plunge', 'slump'];
-                
+                const pos = ['growth', 'up', 'launch', 'success', 'profit', 'surge', 'win', 'bull', 'future', 'ai', 'gain', 'rise', 'strong'];
+                const neg = ['drop', 'fail', 'loss', 'crisis', 'down', 'risk', 'bear', 'warning', 'crash', 'scam', 'fall', 'decline'];
                 let score = 0;
-                const words = text.toLowerCase().split(/\W+/);
-                words.forEach(w => {
+                text.toLowerCase().split(/\W+/).forEach(w => {
                     if (pos.includes(w)) score += 1.8;
                     if (neg.includes(w)) score -= 1.8;
                 });
@@ -189,68 +159,21 @@
             },
 
             clearFeed() {
-                document.getElementById('feed-results').innerHTML = `
-                    <div style="text-align:center; margin-top:120px; opacity:0.6; font-size:1.1rem;">
-                        FEED CLEARED<br>
-                        <span style="font-size:0.85rem;">Ready for new signals</span>
-                    </div>`;
+                document.getElementById('feed-results').innerHTML = '<div style="text-align:center; margin-top:120px; opacity:0.6;">FEED CLEARED</div>';
                 document.getElementById('heat-map').innerHTML = '';
                 document.getElementById('bias-val').innerText = 'NEUTRAL';
                 document.getElementById('bias-val').style.color = '#aaa';
             },
 
-            toggleAutoScroll() {
-                this.autoScrollEnabled = !this.autoScrollEnabled;
-            },
-
-            scrollToTop() {
-                document.getElementById('feed-results').scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            },
-
-            scrollToBottom() {
-                const feed = document.getElementById('feed-results');
-                feed.scrollTo({
-                    top: feed.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }
+            toggleAutoScroll() { this.autoScrollEnabled = !this.autoScrollEnabled; },
+            scrollToTop() { document.getElementById('feed-results').scrollTo({ top: 0, behavior: 'smooth' }); },
+            scrollToBottom() { const f = document.getElementById('feed-results'); f.scrollTo({ top: f.scrollHeight, behavior: 'smooth' }); }
         };
 
-        // Scroll button visibility
-        function setupScrollButton() {
-            const feed = document.getElementById('feed-results');
-            const scrollBtn = document.getElementById('scrollBtn');
-            
-            feed.addEventListener('scroll', () => {
-                if (feed.scrollTop > 400) {
-                    scrollBtn.style.display = 'flex';
-                } else {
-                    scrollBtn.style.display = 'none';
-                }
-            });
-        }
-
-        // Keyboard support
-        document.addEventListener('keydown', (e) => {
-            if (e.key === '/' && document.getElementById('rss-source') !== document.activeElement) {
-                document.getElementById('rss-source').focus();
-                e.preventDefault();
-            }
-            if (e.key === 'End') Swarm.scrollToBottom();
-            if (e.key === 'Home') Swarm.scrollToTop();
-        });
-
-        // Initialize
         window.onload = () => {
-            setupScrollButton();
-            
-            // Demo: auto load one feed after 800ms
-            setTimeout(() => {
-                // Swarm.fetch(); // Uncomment if you want auto-load on start
-            }, 800);
+            const feed = document.getElementById('feed-results');
+            const btn = document.getElementById('scrollBtn');
+            feed.addEventListener('scroll', () => { btn.style.display = feed.scrollTop > 400 ? 'flex' : 'none'; });
         };
     </script>
 </body>
