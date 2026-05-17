@@ -1,5 +1,29 @@
 {
   "short_name": "MASTERR_SWARM",
+  "name": "MASTERR_SWARM // STABLE v2.3",
+  "description": "Terminal-inspired responsive sentiment arbitrage tracking engine.",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/0a0a0a/00f2ff/png?text=SWARM",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/512x512/0a0a0a/00f2ff/png?text=MASTERR_SWARM",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/SWARM/index.html",
+  "background_color": "#0A0A0A",
+  "theme_color": "#8B5A2B",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "utilities"]
+}{
+  "short_name": "MASTERR_SWARM",
   "name": "MASTERR_SWARM // SENTIMENT_ARBITRAGE v2.2",
   "description": "Modular, terminal-inspired sentiment arbitrage tracking and visualization node.",
   "icons": [
