@@ -3,17 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MASTERR_SWARM // SENTIMENT_ARBITRAGE v2.2</title>
-    
-    <link rel="stylesheet" href="./style.css">
-    <link rel="manifest" href="./manifest.json">
+    <title>MASTERR_SWARM // SENTIMENT_ARBITRAGE v2.3</title>
+    <style>
+        :root {
+            --stable-brown: #8B5A2B;
+            --stable-green: #2E8B57;
+            --data-cyan: #00f2ff;
+            --terminal-black: #0A0A0A;
+            --accent-gold: #D4AF37;
+            --bull-green: #00ff88;
+            --bear-red: #ff3366;
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0; padding: 0;
+            background: var(--terminal-black);
+            color: var(--data-cyan); 
+            font-family: 'Consolas', 'Courier New', monospace;
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column;
+        }
+
+        header {
+            padding: 12px 20px; 
+            border-bottom: 3px solid var(--stable-brown);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: linear-gradient(to right, rgba(139, 90, 43, 0.15), rgba(10,10,10,0.95));
+            box-shadow: 0 4px 15px rgba(139, 90, 43, 0.3);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: var(--accent-gold);
+            text-shadow: 0 0 10px var(--accent-gold);
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+        }
+
+        .pulse { 
+            animation: pulse-kf 2.5s infinite; 
+        }
+        @keyframes pulse-kf { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: 0.4; } 
+        }
+
+        main { 
+            flex: 1; 
+            display: grid; 
+            grid-template-columns: 380px 1fr; 
+            overflow: hidden;
+        }
+
+        #feed-control {
+            border-right: 2px solid var(--stable-brown);
+            padding: 20px;
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            overflow-y: auto;
+        }
+
+        #visualization-zone {
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+            overflow: hidden;
+        }
+
+        .data-card {
+            background: rgba(255, 255, 255, 0.04); 
+            border: 1px solid var(--stable-brown);
+            padding: 16px; 
+            margin-bottom: 12px; 
+            transition: all 0.4s ease;
+            border-radius: 4px;
+        }
+
+        .data-card:hover { 
+            border-color: var(--accent-gold); 
+            background: rgba(212, 175, 55, 0.08);
+        }
+
+        .sentiment-badge {
+            font-size: 10px; 
+            padding: 4px 10px; 
+            border-radius: 2px;
+            text-transform: uppercase; 
+            font-weight: bold;
+        }
+
+        .bullish { color: var(--bull-green); border: 1px solid var(--bull-green); }
+        .bearish { color: var(--bear-red); border: 1px solid var(--bear-red); }
+
+        button {
+            background: var(--stable-brown); 
+            color: white; 
+            border: none;
+            padding: 12px 20px; 
+            cursor: pointer; 
+            font-family: inherit; 
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            background: var(--accent-gold);
+            color: black;
+            transform: scale(1.03);
+        }
+
+        #heat-map-container {
+            border-bottom: 2px solid var(--stable-brown); 
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            padding: 12px;
+        }
+
+        #heat-map {
+            height: 160px; 
+            display: flex; 
+            align-items: flex-end; 
+            gap: 5px;
+            overflow-x: auto;
+            padding: 10px 5px;
+            scroll-behavior: smooth;
+        }
+
+        .bar { 
+            width: 16px;
+            min-width: 16px;
+            transition: height 0.6s ease; 
+            border-radius: 3px 3px 0 0;
+        }
+
+        #feed-results { 
+            flex: 1; 
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--stable-brown);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(139, 90, 43, 0.5);
+            z-index: 1000;
+            border: 2px solid var(--accent-gold);
+        }
+
+        .section-title {
+            color: var(--accent-gold);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .stable-label { font-size: 12px; color: var(--stable-green); }
+
+        /* =============== MOBILE RESPONSIVE =============== */
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+            #feed-control {
+                border-right: none;
+                border-bottom: 2px solid var(--stable-brown);
+                max-height: 45vh;
+            }
+            header {
+                padding: 10px 15px;
+            }
+            .logo {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #visualization-zone {
+                padding: 10px;
+            }
+            .data-card {
+                padding: 14px;
+            }
+            button {
+                padding: 12px 16px;
+                font-size: 0.85rem;
+            }
+            #heat-map {
+                height: 130px;
+            }
+            .bar {
+                width: 12px;
+                min-width: 12px;
+            }
+        }
+    </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">MASTERR_SWARM // STABLE v2.2</div>
+        <div class="logo">MASTERR_SWARM // STABLE v2.3</div>
         <div class="status">
-            <span class="pulse" style="color: var(--stable-green)">● STABLE CONNECTION</span>
+            <span class="pulse" style="color: var(--stable-green)">● LIVE</span>
             <span id="node-count" style="font-size: 0.85rem; opacity: 0.8;">NODES: 0</span>
         </div>
     </header>
@@ -31,36 +254,30 @@
                 </select>
             </div>
 
-            <div style="display:flex; gap:12px; flex-wrap: wrap;">
+            <div style="display:flex; gap:12px;">
                 <button onclick="Swarm.fetch()" style="flex:1;">ENGAGE SWARM</button>
                 <button onclick="Swarm.clearFeed()" style="background:#333; flex:0.6;">RESET</button>
             </div>
 
             <div class="data-card">
-                <div class="section-title">SCROLL CONTROLS v2</div>
-                <div class="toggle-switch">
-                    <label class="toggle">
-                        <input type="checkbox" id="auto-scroll-toggle" onchange="Swarm.toggleAutoScroll()">
-                        <span class="slider"></span>
+                <div class="section-title">SCROLL CONTROLS</div>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem;">
+                        <input type="checkbox" id="auto-scroll-toggle" onchange="Swarm.toggleAutoScroll()" checked>
+                        AUTO-SCROLL
                     </label>
-                    <span>AUTO-SCROLL FEED</span>
                 </div>
-                <div style="margin-top:12px; font-size:11px; opacity:0.7;">
-                    <button onclick="Swarm.scrollToTop()" style="padding:8px 16px; font-size:0.8rem;">↑ TOP</button>
-                    <button onclick="Swarm.scrollToBottom()" style="padding:8px 16px; font-size:0.8rem; margin-left:8px;">↓ BOTTOM</button>
+                <div style="margin-top:12px; display:flex; gap:8px;">
+                    <button onclick="Swarm.scrollToTop()" style="padding:10px 16px; flex:1;">↑ TOP</button>
+                    <button onclick="Swarm.scrollToBottom()" style="padding:10px 16px; flex:1;">↓ BOTTOM</button>
                 </div>
             </div>
 
-            <div id="stats" style="font-size: 12px; line-height: 1.8; background:rgba(0,0,0,0.4); padding:15px; border:1px solid var(--stable-brown);">
+            <div id="stats" style="font-size: 13px; line-height: 1.7; background:rgba(0,0,0,0.4); padding:16px; border:1px solid var(--stable-brown);">
                 <div><span class="stable-label">SCAN_DEPTH:</span> 50_NODES</div>
                 <div><span class="stable-label">LATENCY:</span> <span id="latency">~38ms</span></div>
                 <div><span class="stable-label">SENTIMENT_BIAS:</span> <span id="bias-val" style="font-weight:bold;">NEUTRAL</span></div>
                 <div><span class="stable-label">STABILITY:</span> <span style="color:var(--stable-green)">SOLID</span></div>
-            </div>
-
-            <div style="margin-top:auto; font-size:11px; opacity:0.6;">
-                HORSE STABLE PROTOCOL<br>
-                <span style="color:var(--accent-gold)">SENTIMENT ARBITRAGE ENGINE v2.2</span>
             </div>
         </section>
 
@@ -70,9 +287,9 @@
             </div>
 
             <div id="feed-results">
-                <div style="text-align:center; margin-top:120px; opacity:0.6; font-size:1.1rem;">
+                <div style="text-align:center; margin-top:80px; opacity:0.7; font-size:1.1rem;">
                     STABLE AWAITING SIGNAL...<br>
-                    <span style="font-size:0.8rem;">Select source and ENGAGE</span>
+                    <span style="font-size:0.85rem;">Select source and ENGAGE SWARM</span>
                 </div>
             </div>
         </section>
@@ -82,14 +299,15 @@
 
     <script>
         const Swarm = {
-            autoScrollEnabled: false,
+            autoScrollEnabled: true,
 
             async fetch() {
                 const source = document.getElementById('rss-source').value;
                 const resultsCont = document.getElementById('feed-results');
+                
                 resultsCont.innerHTML = `
                     <div style="text-align:center; padding:60px 20px; opacity:0.8;">
-                        <div class="pulse" style="font-size:1.3rem; margin-bottom:15px;">INTERCEPTING STABLE FEED...</div>
+                        <div class="pulse" style="font-size:1.3rem; margin-bottom:15px;">INTERCEPTING FEED...</div>
                     </div>`;
 
                 try {
@@ -100,7 +318,8 @@
                 } catch (e) {
                     resultsCont.innerHTML = `
                         <div style="color:#ff6666; text-align:center; padding:40px;">
-                            STABLE DISRUPTION<br>${e.message}
+                            CONNECTION ERROR<br>
+                            <button onclick="Swarm.fetch()" style="margin-top:15px;">RETRY</button>
                         </div>`;
                 }
             },
@@ -111,9 +330,14 @@
                 resultsCont.innerHTML = '';
                 heatMap.innerHTML = '';
 
+                if (!items || items.length === 0) {
+                    resultsCont.innerHTML = '<div style="text-align:center; padding:60px; opacity:0.6;">No items received.</div>';
+                    return;
+                }
+
                 let totalScore = 0;
 
-                items.slice(0, 50).forEach((item) => {
+                items.slice(0, 60).forEach(item => {
                     const score = this.analyze(item.title + " " + (item.content || item.description || ''));
                     totalScore += score;
 
@@ -123,35 +347,44 @@
                     const vibeText = score >= 1 ? 'BULLISH' : (score <= -1 ? 'BEARISH' : 'NEUTRAL');
 
                     card.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                             <span class="sentiment-badge ${vibeClass}">${vibeText}</span>
+                            <span style="font-size:10px; opacity:0.6;">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                         </div>
-                        <div style="font-weight:600; line-height:1.3; margin-bottom:8px;">${item.title}</div>
-                        <a href="${item.link || '#'}" target="_blank" style="color:var(--accent-gold); font-size:10px; text-decoration:none;">[VIEW SOURCE NODE]</a>
+                        <div style="font-weight:600; line-height:1.35;">${item.title}</div>
+                        <a href="${item.link || '#'}" target="_blank" style="color:var(--accent-gold); font-size:10px; text-decoration:none; margin-top:8px; display:inline-block;">
+                            [VIEW SOURCE]
+                        </a>
                     `;
                     resultsCont.appendChild(card);
 
                     const bar = document.createElement('div');
                     bar.className = 'bar';
-                    bar.style.height = `${Math.min(Math.abs(score) * 38 + 22, 160)}px`;
+                    const height = Math.min(Math.abs(score) * 35 + 25, 150);
+                    bar.style.height = `${height}px`;
                     bar.style.background = score >= 0 ? 'var(--bull-green)' : 'var(--bear-red)';
+                    bar.title = `${item.title} | Score: ${score}`;
                     heatMap.appendChild(bar);
                 });
 
-                const finalBias = totalScore > 8 ? 'BULLISH' : (totalScore < -8 ? 'BEARISH' : 'NEUTRAL');
+                const finalBias = totalScore > 10 ? 'BULLISH' : (totalScore < -10 ? 'BEARISH' : 'NEUTRAL');
                 const biasEl = document.getElementById('bias-val');
                 biasEl.innerText = finalBias;
-                biasEl.style.color = totalScore > 8 ? 'var(--bull-green)' : (totalScore < -8 ? 'var(--bear-red)' : '#aaa');
+                biasEl.style.color = totalScore > 10 ? 'var(--bull-green)' : (totalScore < -10 ? 'var(--bear-red)' : '#aaa');
+
                 document.getElementById('node-count').textContent = `NODES: ${items.length}`;
 
-                if (this.autoScrollEnabled) setTimeout(() => this.scrollToBottom(), 100);
+                if (this.autoScrollEnabled) {
+                    setTimeout(() => this.scrollToBottom(), 150);
+                }
             },
 
             analyze(text) {
-                const pos = ['growth', 'up', 'launch', 'success', 'profit', 'surge', 'win', 'bull', 'future', 'ai', 'gain', 'rise', 'strong'];
-                const neg = ['drop', 'fail', 'loss', 'crisis', 'down', 'risk', 'bear', 'warning', 'crash', 'scam', 'fall', 'decline'];
+                const pos = ['growth','up','launch','success','profit','surge','win','bull','ai','breakthrough','gain','rise','rally','strong','boost','innovat'];
+                const neg = ['drop','fail','loss','crisis','down','risk','bear','crash','scam','fall','decline','fear','recession'];
                 let score = 0;
-                text.toLowerCase().split(/\W+/).forEach(w => {
+                const words = text.toLowerCase().split(/\W+/);
+                words.forEach(w => {
                     if (pos.includes(w)) score += 1.8;
                     if (neg.includes(w)) score -= 1.8;
                 });
@@ -159,21 +392,44 @@
             },
 
             clearFeed() {
-                document.getElementById('feed-results').innerHTML = '<div style="text-align:center; margin-top:120px; opacity:0.6;">FEED CLEARED</div>';
+                document.getElementById('feed-results').innerHTML = `
+                    <div style="text-align:center; margin-top:100px; opacity:0.6;">
+                        FEED CLEARED<br>
+                        <span style="font-size:0.85rem;">Ready for new signals</span>
+                    </div>`;
                 document.getElementById('heat-map').innerHTML = '';
                 document.getElementById('bias-val').innerText = 'NEUTRAL';
-                document.getElementById('bias-val').style.color = '#aaa';
             },
 
-            toggleAutoScroll() { this.autoScrollEnabled = !this.autoScrollEnabled; },
-            scrollToTop() { document.getElementById('feed-results').scrollTo({ top: 0, behavior: 'smooth' }); },
-            scrollToBottom() { const f = document.getElementById('feed-results'); f.scrollTo({ top: f.scrollHeight, behavior: 'smooth' }); }
+            toggleAutoScroll() {
+                this.autoScrollEnabled = !this.autoScrollEnabled;
+            },
+
+            scrollToTop() {
+                document.getElementById('feed-results').scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            scrollToBottom() {
+                const feed = document.getElementById('feed-results');
+                feed.scrollTo({ top: feed.scrollHeight, behavior: 'smooth' });
+            }
         };
 
-        window.onload = () => {
+        function setupScrollButton() {
             const feed = document.getElementById('feed-results');
             const btn = document.getElementById('scrollBtn');
-            feed.addEventListener('scroll', () => { btn.style.display = feed.scrollTop > 400 ? 'flex' : 'none'; });
+            feed.addEventListener('scroll', () => {
+                btn.style.display = feed.scrollTop > 300 ? 'flex' : 'none';
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Home') Swarm.scrollToTop();
+            if (e.key === 'End') Swarm.scrollToBottom();
+        });
+
+        window.onload = () => {
+            setupScrollButton();
         };
     </script>
 </body>
