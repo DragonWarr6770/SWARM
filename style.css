@@ -54,7 +54,7 @@ header {
     50% { opacity: 0.4; } 
 }
 
-/* 🖥️ DESKTOP LAYOUT MAP */
+/* 🖥️ DESKTOP LAYOUT (DEFAULT) */
 main { 
     display: grid; 
     grid-template-columns: 380px 1fr; 
@@ -136,7 +136,6 @@ button:hover {
     transform: scale(1.03);
 }
 
-/* Enhanced Heat Map with Horizontal Scroll */
 #heat-map-container {
     border-bottom: 2px solid var(--stable-brown); 
     padding-bottom: 15px;
@@ -287,7 +286,7 @@ input:checked + .slider:before {
     transform: translateX(24px);
 }
 
-/* 📱 MOBILE RESPONSIVE ADAPTER */
+/* 📱 ADAPTIVE MOBILE ENGINE SWITCH */
 @media (max-width: 768px) {
     main {
         grid-template-columns: 1fr;
